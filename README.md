@@ -1,2 +1,1 @@
-# jago
-a Javascript Add-on for a fully Graph Outline definition
+## JAGO, a Javascript Application for a fully Graph Outline definition

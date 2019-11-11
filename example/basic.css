@@ -1,0 +1,136 @@
+body{
+  background-color: #f7f7f7;
+}
+
+#cy {
+  display: inline-block;
+  width: 70%;
+  margin: 3px;
+  height: 650px;
+  border: solid 3px #cccccc;
+  background-color: #eaeaea;
+}
+
+#cy_panel {
+  display: inline-block;
+  vertical-align: top;
+  margin: 3px;
+  width: 25%;
+  height: 800px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.legend-icon{
+  padding-left: 50px;
+  zoom: 0.2;
+  display: inline-block;
+}
+
+li{
+  width: 80%;
+  border-top: gray solid 0.2px;
+  margin-top: 2px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  list-style-type: none;
+}
+li *{
+  vertical-align:top;
+}
+li input{
+  margin-right: 7px;
+}
+
+.apply-filter-btn{
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  width: 80%;
+  padding: 7px;
+  color: black;
+  font-size: 16px;
+  border: solid 1.5px gray;
+  margin-bottom: 20px;
+}
+
+.apply-filter-btn:hover{
+  cursor: pointer;
+  color: white;
+  background-color: gray;
+}
+
+.graph-info-box{
+   background-color: #eaeaea;
+   border-top: solid gray;
+   border-bottom: solid gray;
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-bottom: 15px;
+   width:80%;
+   word-wrap: break-word;
+   margin: 0 auto;
+}
+.graph-info-box div.header-class{
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  padding-right: 5px;
+  font-size: 13pt;
+  background-color: gray;
+  color: white;
+  border-radius: 0px 0px 10px 10px;
+}
+
+.graph-info-box div.title{
+  padding-top: 10px;
+  font-size: 15pt;
+}
+.graph-info-box div.subtitle{
+  font-size: 13pt;
+}
+.graph-info-box div.name{
+  padding-bottom: 3px;
+  font-size: 15pt;
+}
+.graph-info-box div.source{
+  padding-bottom: 3px;
+  font-size: 10pt;
+}
+.graph-info-box div.location{
+  color: gray;
+  font-size: 13pt;
+}
+.graph-info-box div.start_date{
+  color: gray;
+  font-size: 13pt;
+  display: inline-block;
+}
+.graph-info-box div.end_date{
+  color: gray;
+  font-size: 13pt;
+  display: inline-block;
+}
+.graph-info-box div.contribution{
+  padding-top: 5px;
+  font-size: 11pt;
+  padding-bottom: 10px;
+}
+.graph-info-box div.description{
+  padding-top: 5px;
+  font-size: 11pt;
+  padding-bottom: 10px;
+}
+
+.graph-info-box div.reference{
+  padding-bottom: 3px;
+  font-size: 13pt;
+}
+
+.graph-info-box div.webpage{
+  text-align: right;
+  padding-bottom: 3px;
+  font-size: 12pt;
+}
