@@ -42,15 +42,45 @@ li input{
   margin-right: 7px;
 }
 
+.list-keyword{
+  margin-left: 40px;
+  margin-bottom: 10px;
+}
+.list-keyword .a-keyword{
+  padding: 4px;
+  font-size: 13pt;
+  background-color: gray;
+  border-radius: 3px 3px 3px 3px;
+  color: white;
+  border: solid 2px gray;
+  width: fit-content;
+  margin: 5px;
+  display: inline-block;
+}
+
+.list-keyword .a-keyword.first{
+  background-color: white;
+  color: gray;
+  border: solid 2px gray;
+  opacity: 0.6;
+}
+.list-keyword .a-keyword.first:hover{
+  cursor: pointer;
+  color: white;
+  background-color: gray;
+  opacity: 1;
+}
+
 .apply-filter-btn{
   display: block;
   margin: 0 auto;
   border-radius: 8px;
-  width: 80%;
+  width: 75%;
   padding: 7px;
   color: black;
   font-size: 16px;
   border: solid 1.5px gray;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
@@ -123,6 +153,29 @@ li input{
 }
 .graph-info-box div.hasKeyword .value::before {
   content: "# ";
+}
+.opt-list{
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  color: gray;
+  width: 80%;
+  max-height: 250px;
+  overflow: scroll;
+  border-right: solid gray;
+  border-left: solid gray;
+}
+.opt-list .opt-list-item{
+  padding-left: 5px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  border-bottom: 0.5px dotted gray;
+}
+.opt-list .opt-list-item:hover{
+  cursor: pointer;
+  color: white;
+  background-color: gray;
 }
 
 /*Member*/

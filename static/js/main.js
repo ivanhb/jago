@@ -79,7 +79,8 @@ var graph_style = {
     }
 }
 var graph_filter = {
-  "nodes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"]
+  "nodes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"],
+  "keywords":{class: "Keyword", attribute:"value", items:[]}
 };
 var graph_info_panel = {
   nodes:{
@@ -421,7 +422,7 @@ function build_panel() {
 
   // Add the filter legend
   // ***************************
-  var legend_container = document.createElement("div");
+  var filter_section = document.createElement("div");
 
   var list_items = document.createElement("ul");
   for (var i = 0; i < graph_conf.nodes.length; i++) {
@@ -455,7 +456,40 @@ function build_panel() {
     a_li.innerHTML = "<input class='checkbox-node' type='checkbox' value='"+graph_conf.nodes[i].class+"' "+is_checked+"><span>"+graph_conf.nodes[i].class+"</span><span>"+legend_icon+"</span>";
     list_items.appendChild(a_li);
   }
-  legend_container.appendChild(list_items);
+  filter_section.appendChild(list_items);
+
+
+  // Add the keyword filter
+  // ***************************
+  var keyword_container = document.createElement("div");
+  keyword_container.className = "list-keyword";
+  if ("keywords" in graph_filter) {
+    var keyword_val = "Add #keyword";
+    i_kw = 0;
+    var first_class = "first";
+    do {
+      var a_keyword = document.createElement("div");
+      a_keyword.innerHTML = keyword_val;
+      a_keyword.className = "a-keyword "+first_class;
+      if (first_class != "") {
+        first_class = "";
+        a_keyword.onclick = function(){
+          //build the list of options
+          if (("class" in graph_filter.keywords) && ("attribute" in graph_filter.keywords)) {
+              console.log(class_index[graph_filter.keywords.class].items);
+              var list_of_opt = build_list_options(class_index[graph_filter.keywords.class].items, graph_filter.keywords.attribute);
+              console.log(list_of_opt);
+              this.parentNode.insertBefore(list_of_opt, this.nextSibling);
+          }
+
+        };
+      }
+      keyword_container.appendChild(a_keyword);
+      keyword_val = graph_filter.keywords.items[i_kw];
+      i_kw += 1;
+    } while (keyword_val != undefined);
+  }
+  filter_section.appendChild(keyword_container);
 
   // Add the filter button
   // ***************************
@@ -474,11 +508,11 @@ function build_panel() {
     }
     build_graph();
   };
-  legend_container.appendChild(apply_filter_btn);
+  filter_section.appendChild(apply_filter_btn);
 
   // Add all to the panel
   // ***************************
-  grpah_panel.appendChild(legend_container);
+  grpah_panel.appendChild(filter_section);
 
 
   // Add the events handler
@@ -571,6 +605,38 @@ function build_panel() {
           return res;
         }
       }
+  }
+
+  function build_list_options(list, att) {
+    var sorted_values = [];
+    for (var i = 0; i < list.length; i++) {
+      if (att in list[i].attribute) {
+        sorted_values.push(list[i].attribute[att]);
+      }
+    }
+
+    sorted_values = sorted_values.sort();
+
+    //add the html component
+    var list_container = document.createElement("div");
+    list_container.id = "opt_list";
+    list_container.className = "opt-list "+att;
+    for (var i = 0; i < sorted_values.length; i++) {
+      var a_list_elem = document.createElement("div");
+      a_list_elem.className = "opt-list-item";
+      a_list_elem.innerHTML = sorted_values[i];
+      list_container.appendChild(a_list_elem);
+
+      a_list_elem.onclick = function(){
+        var a_add_keyword = document.createElement("div");
+        a_add_keyword.className = "a-keyword ";
+        a_add_keyword.innerHTML = "<span class='value'>"+this.innerHTML+"</span><span class='close-class'>  &#10005;</span>";
+        document.getElementById("opt_list").remove();
+        keyword_container.appendChild(a_add_keyword);
+      };
+    }
+
+    return list_container;
   }
 
 }
