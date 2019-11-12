@@ -527,7 +527,7 @@ function build_panel() {
 
           var _li = document.createElement("div");
           _li.innerHTML = class_name;
-          _li.className = "header-class";
+          _li.className = "header-class "+class_name;
           //_li.style.color = "blue";
           _ul.appendChild(_li);
 
@@ -629,10 +629,13 @@ function build_panel() {
 
       a_list_elem.onclick = function(){
         var a_add_keyword = document.createElement("div");
-        a_add_keyword.className = "a-keyword ";
-        a_add_keyword.innerHTML = "<span class='value'>"+this.innerHTML+"</span><span class='close-class'>  &#10005;</span>";
+        a_add_keyword.className = "a-keyword";
+        a_add_keyword.innerHTML = "<span class='value'>"+this.innerHTML+"</span><span class='close-class'>&#10005;</span>";
         document.getElementById("opt_list").remove();
         keyword_container.appendChild(a_add_keyword);
+        $(".a-keyword .close-class").on( "click", function() {
+          this.parentNode.remove();
+        });
       };
     }
 

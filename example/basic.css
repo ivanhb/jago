@@ -119,6 +119,27 @@ li input{
   border-radius: 0px 0px 10px 10px;
   display: inline-block;
 }
+.graph-info-box div.header-class.organization{
+  background-color: #2F8A60;
+}
+.graph-info-box div.header-class.project{
+  background-color: #2296EE;
+}
+.graph-info-box div.header-class.activity{
+  background-color: #ee7a22;
+}
+.graph-info-box div.header-class.demo{
+  background-color: #CE1271;
+}
+.graph-info-box div.header-class.presentation{
+  background-color: #CE1271;
+}
+.graph-info-box div.header-class.publication{
+  background-color: #F4D03F;
+}
+.graph-info-box div.header-class.code{
+  background-color: #9E4FC5;
+}
 
 .graph-info-box div.close-class{
   margin-left: 5px;
@@ -176,6 +197,15 @@ li input{
   cursor: pointer;
   color: white;
   background-color: gray;
+}
+
+.a-keyword .close-class{
+  padding: 0px!important;
+  margin-left: 6px;
+  font-size: 10pt;
+  color: #FFE9E2;
+  vertical-align: top;
+  cursor: pointer;
 }
 
 /*Member*/
