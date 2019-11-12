@@ -5,73 +5,71 @@ var model_url = "https://ivanhb.github.io/edu/model/";
 
 var graph_conf = {
   "nodes": [
-    {"group":"7", "class":"Code"},
-    {"group":"5", "class":"Publication"},
-    {"group":"1", "class":"Activity"},
-    {"group":"4", "class":"Organization"},
-    {"group":"2", "class":"Project"},
-    {"group":"3", "class":"Demo"},
-    {"group":"3", "class":"Presentation"},
+    {"group":"007", "class":"Code"},
+    {"group":"005", "class":"Publication"},
+    {"group":"001", "class":"Activity"},
+    {"group":"004", "class":"Organization"},
+    {"group":"002", "class":"Project"},
+    {"group":"003", "class":"Demo"},
+    {"group":"003", "class":"Presentation"}
     //{"group":"6", "class":"Report"}
   ],
+  "attributes":{
+    "Publication":["nickname","reference","reference_format","author","date","persistent_id","persistent_id_type","@hasKeyword"],
+    "Code":["nickname","title","subtitle","date","persistent_id","persistent_id_type","source","@hasKeyword"],
+    "Activity":["nickname","title","subtitle","date","description","contribution","location","webpage","start_date","end_date","@hasKeyword"],
+    "Organization":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date","@hasKeyword","@hasMember"],
+    "Project":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date","@hasKeyword","@hasMember"],
+    "Demo":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date","@hasKeyword"],
+    "Presentation":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date","@hasKeyword"],
+    "Member": ["role","@hasPerson"],
+    "Person":["nickname","name","position","affiliation","webpage"],
+    "Keyword": ["value"]
+  },
   "edges": [
     "@hasWork",
     "@hasIllustration",
     "@hasProduct",
     "@hasOrganization"
-  ],
-  "attributes":{
-    "Publication":["nickname","reference","reference_format","author","date","persistent_id","persistent_id_type"],
-    "Code":["nickname","title","subtitle","date","persistent_id","persistent_id_type","source"],
-    "Activity":["nickname","title","subtitle","date","description","contribution","location","webpage","start_date","end_date"],
-    "Organization":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date"],
-    "Project":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date"],
-    "Demo":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date"],
-    "Presentation":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date"]
-  },
-  "properties": {
-    "Keyword": ["value"],
-    "Member": ["role","@hasPerson"],
-    "Person":["nickname","name","position","affiliation","webpage"]
-  }
+  ]
 }
 var graph_style = {
     "group": {
-      "1": {
+      "001": {
         'shape': 'diamond',
         'width': '35',
         'height': '35',
         'background-color': '#ee7a22',
         'label': 'data(attribute.nickname)'
       },
-      "2": {
+      "002": {
         'shape': 'pentagon',
         'width': '50',
         'height': '50',
         'background-color': '#2296EE',
         'label': 'data(attribute.nickname)'
       },
-      "3": {
+      "003": {
         'shape': 'diamond',
         'width': '20',
         'height': '20',
         'background-color': '#CE1271',
         'label': 'data(attribute.nickname)'
       },
-      "5": {
+      "005": {
         'width': '20',
         'height': '20',
         'background-color': '#F4D03F',
         'label': 'data(attribute.nickname)'
       },
-      "4": {
+      "004": {
         'shape': 'pentagon',
         'width': '100',
         'height': '100',
         'background-color': '#2F8A60',
         'label': 'data(attribute.nickname)'
       },
-      "7": {
+      "007": {
         'shape': 'diamond',
         'width': '20',
         'height': '20',
@@ -80,16 +78,21 @@ var graph_style = {
       }
     }
 }
-var graph_filter = {"nodes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"]};
+var graph_filter = {
+  "nodes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"]
+};
 var graph_info_panel = {
   nodes:{
-    "Code": {"title":[],"source":[is_link]},
-    "Publication": {"reference":[],"persistent_id":[is_link]},
-    "Activity": {"start_date":[],"end_date":[is_end_date],"location":[],"title":[],"subtitle":[],"contribution":[is_contribution],"webpage":[is_webpage]},
-    "Organization": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[],"webpage":[is_webpage]},
-    "Project": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[is_personal_webpage],"webpage":[is_webpage]},
-    "Demo": {"title":[],"source":[is_link]},
-    "Presentation": {"title":[],"source":[is_link]}
+    "Code": {"title":[],"source":[is_link],"@hasKeyword":null},
+    "Publication": {"reference":[],"persistent_id":[is_link],"@hasKeyword":null},
+    "Activity": {"start_date":[],"end_date":[is_end_date],"location":[],"title":[],"subtitle":[],"contribution":[is_contribution],"@hasKeyword":null,"webpage":[is_webpage]},
+    "Organization": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[],"@hasMember":null,"@hasKeyword":null,"webpage":[is_webpage]},
+    "Project": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[is_personal_webpage],"@hasMember":null,"@hasKeyword":null,"webpage":[is_webpage]},
+    "Demo": {"title":[],"source":[is_link],"@hasKeyword":null},
+    "Presentation": {"title":[],"source":[is_link],"@hasKeyword":null},
+    "Keyword": {"value":[]},
+    "Member": {"@hasPerson":null},
+    "Person":{"nickname":[]}
   }
 }
 
@@ -115,9 +118,12 @@ var model_index = null;
 // an index of all the classes inside the model index
 var class_index = null;
 
+// the aditional data of all the other classes which are not nodes inside the graph
+var class_data_non_nodes = {};
+
 // the definition of the cy_graph
 // this variable will be the input of cytoscape() to define the cy graph, after the end of definition process
-var cy_graph_def = {}
+var cy_graph_def = {};
 
 // an index of all the elements in the cy_graph_def
 var cy_graph_index = null;
@@ -149,29 +155,21 @@ function init(){
   cy_graph_def["layout"] = {name: 'cola'};
 
   class_index = {};
-  cy_graph_index = {"nodes":{},"edges":{},"properties":{}};
+  cy_graph_index = {"nodes":{},"edges":{}};
 }
 
 function def_class(class_name){
 
   var class_file = "";
   var class_tree = [];
-  var class_relation = {};
-  var class_properties = {};
+  var class_edges = {};
 
   var init_class_name = class_name;
   do {
     class_tree.push(init_class_name);
     data_class_obj = model_index["class"][init_class_name];
-    for (var rel_k in data_class_obj["relation"]) {
-      if (graph_conf.edges.indexOf(rel_k) != -1) {
-        class_relation[rel_k] = data_class_obj["relation"][rel_k];
-      }else {
-        if (data_class_obj["relation"][rel_k] in graph_conf.properties) {
-          class_properties[rel_k] = data_class_obj["relation"][rel_k];
-        }
-      }
-    }
+    //add the relations which are edges
+    class_edges = Object.assign({}, class_edges, data_class_obj.relation);
     init_class_name = data_class_obj["@isSubclassOf"];
   } while (init_class_name != undefined);
 
@@ -183,13 +181,16 @@ function def_class(class_name){
   return {
     "items": [],
     "tree": class_tree,
-    "relation": class_relation,
-    "properties": class_properties,
+    "edges": class_edges,
     "file": "src/"+class_file,
     "prefix": data_class_obj["prefix"]
   }
 }
 
+var pending = {
+  nodes: {},
+  non_nodes: {}
+}
 function build_graph() {
 
   // init all the graph elements
@@ -201,7 +202,32 @@ function build_graph() {
     class_index[a_class] = a_class_def;
   }
 
-  process_nodes(0);
+  //Define all the non-nodes classes
+  var other_classes = [];
+  for (var a_class in graph_conf.attributes) {
+    var is_node = false;
+    for (var i = 0; i < graph_conf.nodes.length; i++) {
+      is_node = is_node || (graph_conf.nodes[i].class == a_class);
+    }
+    if (!(is_node)) {
+      pending.non_nodes[a_class] = false;
+      other_classes.push(a_class);
+    }
+  }
+
+  //define the pending for nodes
+  for (var i = 0; i < graph_conf["nodes"].length; i++) {
+    var class_name = graph_conf["nodes"][i]["class"];
+    pending.nodes[class_name] = false;
+  }
+
+
+  for (var i = 0; i < graph_conf["nodes"].length; i++) {
+    process_nodes(i);
+  }
+  for (var i = 0; i < other_classes.length; i++) {
+    process_a_non_node(i);
+  }
 
   function process_nodes(index){
     var class_name = graph_conf["nodes"][index]["class"];
@@ -213,37 +239,17 @@ function build_graph() {
             url: model_url+a_class_def.file,
             dataType: "json",
             async: true,
+            error: function(xhr) {
+              //Do Something to handle error
+              //pending.nodes[class_name] = true;
+            },
             success: function(a_class_file_data) {
               if (graph_filter.nodes.indexOf(class_name) != -1) {
                   if ("items" in a_class_file_data) {
 
-                        class_index[class_name]["items"] = a_class_file_data["items"];
+                          class_index[class_name]["items"] = a_class_file_data["items"];
 
-                        // ----------
-                        // The Nodes
-                        // ----------
-                        for (var i = 0; i < a_class_file_data["items"].length; i++) {
-                              var elem_node = {};
-                              var _data_item = a_class_file_data["items"][i];
-                              var elem_data = {
-                                  "id": a_class_def.prefix+"/"+_data_item["id"],
-                                  "item_class": class_name,
-                                  "attribute": {},
-                                  "properties": {}
-                              }
-                              if (class_name in graph_conf["attributes"]) {
-                                for (var att_key in _data_item["attribute"]) {
-                                  if (graph_conf["attributes"][class_name].indexOf(att_key) != -1) {
-                                    elem_data["attribute"][att_key] = _data_item["attribute"][att_key];
-                                  }
-                                }
-                              }
-
-                              elem_node["data"] = elem_data;
-                              //assign the index position in the cy_graph_def
-                              cy_graph_index.nodes[elem_node.data.id] = cy_graph_def["elements"].nodes.length;
-                              cy_graph_def["elements"].nodes.push(elem_node);
-                          }
+                          def_elems(class_name, a_class_def, a_class_file_data);
 
                           // ----------
                           // The style of the Element
@@ -260,179 +266,153 @@ function build_graph() {
 
                     }
                 }
+                pending.nodes[class_name] = true;
+                process_edges();
+            }
+    });
+  }
 
-                if (index < graph_conf["nodes"].length - 1) {
-                  process_nodes(index + 1)
-                }else {
-                  process_edges();
-
-                  process_properties();
-
-                  // Ready to build all
-                  cy_graph = cytoscape(cy_graph_def);
-                  build_panel();
-                  console.log(cy_graph_def);
-                  console.log(class_index);
-                  console.log(cy_graph_index);
-                }
+  function process_a_non_node(index) {
+    var class_name = other_classes[index];
+    var a_class_def = class_index[class_name];
+    $.ajax({
+            type: "GET",
+            url: model_url+a_class_def.file,
+            dataType: "json",
+            async: true,
+            error: function(xhr) {
+              //Do Something to handle error
+              pending.nodes[class_name] = true;
+            },
+            success: function(a_class_file_data) {
+              class_index[class_name]["items"] = a_class_file_data["items"];
+              def_elems(class_name, a_class_def, a_class_file_data, is_node= false);
+              pending.non_nodes[class_name] = true;
+              process_edges();
             }
     });
   }
 
   function process_edges() {
 
-      for (var class_name in class_index) {
-        var a_class_def = class_index[class_name];
+    //when all pending calls are done
+    if (are_no_pending_calls()){
 
-        // ----------
-        // The Edges
-        // ----------
-        for (var i = 0; i < class_index[class_name]["items"].length; i++) {
-            var _data_item = class_index[class_name]["items"][i];
-            if ("relation" in _data_item) {
-              for (var relation_key in _data_item["relation"]) {
-                  if (relation_key in a_class_def.relation) {
-                    for (var k = 0; k < _data_item["relation"][relation_key].length; k++) {
-                        var elem_edge = {"data":{}};
-                        elem_edge.data["source"] = a_class_def.prefix+"/"+_data_item["id"];
+          for (var class_name in class_index) {
+            var a_class_def = class_index[class_name];
 
-                        var target_class = a_class_def.relation[relation_key];
-                        if (!(target_class in graph_conf.properties)) {
-                          var target_prefix = class_index[target_class].prefix;
-                          var target_id = target_prefix+"/"+_data_item["relation"][relation_key][k];
+            // ----------
+            // The Edges
+            // ----------
+            for (var i = 0; i < class_index[class_name]["items"].length; i++) {
+                var _data_item = class_index[class_name]["items"][i];
 
-                          if(target_id in cy_graph_index.nodes){
-                            elem_edge.data["target"] = target_prefix+"/"+_data_item["relation"][relation_key][k];
-                            elem_edge.data["id"] = relation_key+":"+elem_edge.data["source"]+";"+elem_edge.data["target"];
-                            cy_graph_index.edges[elem_edge.data.id] = cy_graph_def["elements"].edges.length;
-                            cy_graph_def["elements"].edges.push(elem_edge);
-                          }
-                        }
-                    }
-                  }else {
-                    //maybe the relation is a property
-                    if (relation_key in a_class_def.properties) {
-                      var source_id = a_class_def.prefix+"/"+_data_item["id"];
-                      var prefix_of_prop = class_index[a_class_def.properties[relation_key]].prefix;
-                      //update the corresponding node with its properties
-                      if (source_id in cy_graph_index.nodes) {
-                        // add this relation in the properities of the node
-                        var corresponding_node_prop = cy_graph_def["elements"].nodes[cy_graph_index.nodes[source_id]].data.properties;
-                        corresponding_node_prop[relation_key] = [];
+                if ("relation" in _data_item) {
+                  for (var relation_key in _data_item["relation"]) {
 
-                        //for each id of such relation add it with its corresponding prefix
                         for (var k = 0; k < _data_item["relation"][relation_key].length; k++) {
-                          var target_id = prefix_of_prop+"/"+_data_item["relation"][relation_key][k];
-                          corresponding_node_prop[relation_key].push(target_id);
+                            var elem_edge = {"data":{}};
+                            var source_id = a_class_def.prefix+"/"+_data_item["id"];
+                            elem_edge.data["source"] = source_id;
 
-                          // update the cy_graph index
-                          if (!(target_id in cy_graph_index.properties)) {
-                            cy_graph_index.properties[target_id] = [];
-                          }
-                          cy_graph_index.properties[target_id].push(source_id);
+                            var target_class = a_class_def.edges[relation_key];
+                            var target_prefix = class_index[target_class].prefix;
+                            var target_id = target_prefix+"/"+_data_item["relation"][relation_key][k];
 
+                            //if both source and target nodes exist then this is an edge
+                            if((source_id in cy_graph_index.nodes) && (target_id in cy_graph_index.nodes)){
+                              if (relation_key in a_class_def.edges) {
+                                elem_edge.data["target"] = target_id;
+                                elem_edge.data["id"] = relation_key+":"+source_id+";"+target_id;
+                                cy_graph_index.edges[elem_edge.data.id] = cy_graph_def["elements"].edges.length;
+                                cy_graph_def["elements"].edges.push(elem_edge);
+                              }
+                            }
+                            //if the source exist but not the target this might be an attribute
+                            else{
+                              if(source_id in cy_graph_index.nodes){
+                                var corresponding_node = cy_graph_def["elements"].nodes[cy_graph_index.nodes[source_id]];
+                                // is an attribute ?
+                                if (relation_key in corresponding_node.data.attribute) {
+                                  corresponding_node.data.attribute[relation_key].push(target_id);
+                                }
+                              }
+                              // in this case is a non-node and we just need to update the target id with a prefix-target version
+                              else if ((source_id in class_data_non_nodes) && (target_id in class_data_non_nodes)) {
+                                class_data_non_nodes[source_id].attribute[relation_key].push(target_id);
+                              }
+                            }
                         }
-                      }
-                    }
                   }
-              }
+                }
             }
+          }
+
+          // Ready to build all
+          cy_graph = cytoscape(cy_graph_def);
+          build_panel();
+          console.log(class_data_non_nodes);
+          console.log(cy_graph_def);
+          console.log(class_index);
+          console.log(cy_graph_index);
+      }
+
+      function are_no_pending_calls(){
+        var res = true;
+        for (var a_class in pending.nodes) {
+          res = res && pending.nodes[a_class];
         }
+        for (var a_class in pending.non_nodes) {
+          res = res && pending.non_nodes[a_class];
+        }
+        return res;
       }
   }
 
-  function process_properties(){
-    var prop_data = {};
-    var prop_relation = {};
-    var prop_keys = Object.keys(graph_conf["properties"]);
-    if (prop_keys.length > 0) {
-      get_properties_class_data(0,prop_keys,graph_conf["properties"]);
-    }
+  function def_elems(class_name, a_class_def, a_class_file_data, is_node = true){
 
-    function get_properties_class_data(i_k,a_list,graph_conf_properities) {
-      //get from index all the vars of this Class
-      var a_class_name = a_list[i_k];
-      var a_arr_att = graph_conf_properities[a_class_name];
-      var a_class_def = class_index[a_class_name];
-      var prop_class_prefix = a_class_def.prefix;
+          // ----------
+          // The Elems
+          // ----------
+          for (var i = 0; i < a_class_file_data["items"].length; i++) {
 
-      $.ajax({
-              type: "GET",
-              url: model_url+a_class_def.file,
-              dataType: "json",
-              async: true,
-              success: function(a_class_file_data) {
-                console.log(a_class_file_data);
-
-                //now check all the elements which have properties and update them
-                for (var i_prop = 0; i_prop < a_class_file_data.items.length; i_prop++) {
-                  //the id (with prefix) of the properity
-                  var id_prop = prop_class_prefix+"/"+a_class_file_data.items[i_prop].id;
-
-                  // we need to build this property with all its corresponding attributes
-                  prop_data[id_prop] = build_class_data(a_class_name, a_arr_att, a_class_file_data.items[i_prop], "properties");
-
+                var _data_item = a_class_file_data["items"][i];
+                var node_data = {
+                    "id": a_class_def.prefix+"/"+_data_item["id"],
+                    "item_class": class_name,
+                    "attribute": {}
                 }
 
-                if (i_k < a_list.length - 1) {
-                  get_properties_class_data(i_k + 1, a_list, graph_conf_properities)
-                }else {
-
-                  //embed together properities
-                  for (var a_prop_id in prop_data) {
-                    for (var att_key in prop_data[a_prop_id]) {
-                      if (att_key.startsWith("@")) {
-                        //check all the elements of the @...
-                        for (var i = 0; i < prop_data[a_prop_id][att_key].length; i++) {
-                          if(prop_data[a_prop_id][att_key][i] in prop_data){
-                            prop_data[a_prop_id] = Object.assign({}, prop_data[a_prop_id], prop_data[prop_data[a_prop_id][att_key][i]]);
-                          }
-                        }
-                        delete prop_data[a_prop_id][att_key];
+                if (class_name in graph_conf["attributes"]) {
+                    //add the attributes with absolute values
+                    for (var att_key in _data_item["attribute"]) {
+                      if (graph_conf["attributes"][class_name].indexOf(att_key) != -1) {
+                        node_data["attribute"][att_key] = _data_item["attribute"][att_key];
                       }
                     }
-                  }
-
-                  console.log(prop_data);
-                  //assign_prop_data_to_nodes();
+                    //add the attributes which comes from relations as <ATT>:[]
+                    //these will be populated after with the corresponding ids
+                    for (var i_att = 0; i_att < graph_conf["attributes"][class_name].length; i_att++) {
+                      var att_key = graph_conf["attributes"][class_name][i_att];
+                      if (att_key.startsWith("@")) {
+                        if (att_key in a_class_def.edges) {
+                          node_data["attribute"][att_key] = [];
+                        }
+                      }
+                    }
                 }
-              }
-      });
-    }
 
-    //giveb a class it will build all its data
-    // the attributes will include the attributes of its realtion classes if they appear in arr_att
-    function build_class_data(class_name, arr_att, elem_data, relation_type = "relation"){
-        var res = {};
-
-        if ("attribute" in elem_data) {
-          for (var an_att in elem_data.attribute) {
-            if (arr_att.indexOf(an_att) != -1) {
-              res[an_att] = elem_data.attribute[an_att];
+                if (is_node) {
+                  //assign the index position in the cy_graph_def
+                  cy_graph_index.nodes[node_data.id] = cy_graph_def["elements"].nodes.length;
+                  cy_graph_def["elements"].nodes.push({"data":node_data});
+                }else {
+                  class_data_non_nodes[node_data.id] = node_data;
+                }
             }
-          }
-        }
 
-        if ("relation" in elem_data) {
-          for (var an_att in elem_data.relation) {
-            if (arr_att.indexOf(an_att) != -1) {
-              var target_class = class_index[class_name][relation_type][an_att];
-              res[an_att] = elem_data.relation[an_att];
-              for (var i = 0; i < res[an_att].length; i++) {
-                res[an_att][i] = class_index[target_class].prefix + "/" + res[an_att][i];
-              }
-            }
-          }
-        }
+      }
 
-        return res;
-    }
-
-    function assign_prop_data_to_nodes(){
-
-    }
-
-  }
 }
 
 
@@ -510,29 +490,87 @@ function build_panel() {
       if ((attributes != undefined) && (class_name in graph_info_panel.nodes)){
           var _ul = document.createElement("div");
           _ul.className = "graph-info-box";
+
           var _li = document.createElement("div");
           _li.innerHTML = class_name;
           _li.className = "header-class";
           //_li.style.color = "blue";
           _ul.appendChild(_li);
 
+          _li = document.createElement("div");
+          _li.innerHTML = "&#10005;";
+          _li.className = "close-class";
+          _li.onclick = function(){$(".graph-info-box").remove();};
+          _ul.appendChild(_li);
+
           var arr_graph_panel_info_att = graph_info_panel.nodes[class_name];
           for (var att_k in arr_graph_panel_info_att) {
             if (att_k in attributes) {
-
-              var inner_html_str = attributes[att_k];
-              for (var i_f = 0; i_f < arr_graph_panel_info_att[att_k].length; i_f++) {
-                inner_html_str = Reflect.apply(arr_graph_panel_info_att[att_k][i_f],undefined,[inner_html_str]);
+              var inner_html_str = "";
+              if (att_k.startsWith("@")) {
+                for (var att_k_i = 0; att_k_i < attributes[att_k].length; att_k_i++) {
+                  if (attributes[att_k][att_k_i] in class_data_non_nodes) {
+                    var a_nonnode_obj = class_data_non_nodes[attributes[att_k][att_k_i]];
+                    var res = build_one_nonnode(a_nonnode_obj);
+                    for (var k_res in res) {
+                      inner_html_str = inner_html_str + "<div class='"+k_res+"'>" + res[k_res] + "</div>";
+                    }
+                  }
+                }
+              }else {
+                inner_html_str = attributes[att_k];
+                for (var i_f = 0; i_f < arr_graph_panel_info_att[att_k].length; i_f++) {
+                  inner_html_str = Reflect.apply(arr_graph_panel_info_att[att_k][i_f],undefined,[inner_html_str]);
+                }
               }
 
               _li = document.createElement("div");
-              _li.className = att_k;
+              var class_att_k = att_k;
+              if (class_att_k.startsWith("@")) {
+                class_att_k = class_att_k.substring(1,)
+              }
+              _li.className = "att"+" "+class_att_k;
               _li.innerHTML = inner_html_str;
               _ul.appendChild(_li);
             }
           }
-          console.log(_ul);
           grpah_panel.appendChild(_ul);
       }
   });
+
+  function build_one_nonnode(a_nonnode) {
+      var current_class = a_nonnode.item_class;
+      if (current_class in graph_info_panel.nodes) {
+        var relations_to_process = {};
+        var res = {};
+
+        // check all the inner attributes
+        for (var att_k in graph_info_panel.nodes[current_class]) {
+          if (att_k.startsWith("@")) {
+            if (att_k in a_nonnode.attribute) {
+              relations_to_process[att_k] = a_nonnode.attribute[att_k];
+            }
+          }else {
+            var inner_html_str = a_nonnode.attribute[att_k];
+            for (var i_f = 0; i_f < graph_info_panel.nodes[current_class][att_k].length; i_f++) {
+              inner_html_str = Reflect.apply(arr_graph_panel_info_att[att_k][i_f],undefined,[inner_html_str]);
+            }
+            //res[att_k] = a_nonnode.attribute[att_k];
+            res[att_k] = inner_html_str;
+          }
+        }
+
+        if (Object.keys(relations_to_process).length == 0) {
+          return res;
+        }else {
+          for (var att_k in relations_to_process) {
+            for (var i_att_k = 0; i_att_k < relations_to_process[att_k].length; i_att_k++) {
+              res = Object.assign({}, res, build_one_nonnode(class_data_non_nodes[relations_to_process[att_k][i_att_k]]));
+            }
+          }
+          return res;
+        }
+      }
+  }
+
 }

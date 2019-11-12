@@ -16,7 +16,7 @@ body{
   vertical-align: top;
   margin: 3px;
   width: 25%;
-  height: 800px;
+  height: fit-content;
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -61,15 +61,20 @@ li input{
 }
 
 .graph-info-box{
-   background-color: #eaeaea;
-   border-top: solid gray;
-   border-bottom: solid gray;
+   z-index: 10;
+   top: 25px;
+   left: 26%;
+   position: absolute;
+   background-color: white;
+   border: solid gray;
    padding-left: 10px;
    padding-right: 10px;
    padding-bottom: 15px;
-   width:80%;
+   width:25%;
    word-wrap: break-word;
    margin: 0 auto;
+   max-height: 580px;
+   overflow: scroll;
 }
 .graph-info-box div.header-class{
   width: 80%;
@@ -82,16 +87,66 @@ li input{
   background-color: gray;
   color: white;
   border-radius: 0px 0px 10px 10px;
+  display: inline-block;
+}
+
+.graph-info-box div.close-class{
+  margin-left: 5px;
+  width: 10%;
+  float:right;
+  text-align: center;
+  padding:1px;
+  font-size: 15pt;
+  background-color: #9F2800;
+  color: white;
+  border-radius: 0px 0px 10px 10px;
+  opacity: 0.6;
+}
+.graph-info-box div.close-class:hover{
+  cursor:pointer;
+  opacity: 1;
+}
+
+.graph-info-box div.att{
+  padding-top: 10px;
+}
+
+/*Keyword*/
+.graph-info-box div.hasKeyword .value{
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  background-color: gray;
+  color: white;
+  padding: 4px;
+  border-radius: 3px 3px 3px 3px;
+}
+.graph-info-box div.hasKeyword .value::before {
+  content: "# ";
+}
+
+/*Member*/
+.graph-info-box div.hasMember .nickname{
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  background-color: #dfb38f;
+  padding: 4px;
+  border-radius: 3px 3px 3px 3px;
+}
+.graph-info-box div.hasMember .nickname::before {
+  content: "> ";
 }
 
 .graph-info-box div.title{
-  padding-top: 10px;
+  padding-top: 0px;
   font-size: 15pt;
 }
 .graph-info-box div.subtitle{
   font-size: 13pt;
 }
 .graph-info-box div.name{
+  padding-top: 0px;
   padding-bottom: 3px;
   font-size: 15pt;
 }
@@ -102,6 +157,7 @@ li input{
 .graph-info-box div.location{
   color: gray;
   font-size: 13pt;
+  padding-top: 0px;
 }
 .graph-info-box div.start_date{
   color: gray;
