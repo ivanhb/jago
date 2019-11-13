@@ -1,10 +1,15 @@
+:root {
+  --width-panel: 25%;
+  --width-graph: 70%;
+}
+
 body{
   background-color: #f7f7f7;
 }
 
 #cy {
   display: inline-block;
-  width: 70%;
+  width: var(--width-graph);
   margin: 3px;
   height: 650px;
   border: solid 3px #cccccc;
@@ -15,7 +20,7 @@ body{
   display: inline-block;
   vertical-align: top;
   margin: 3px;
-  width: 25%;
+  width: var(--width-panel);
   height: fit-content;
   padding-left: 10px;
   padding-right: 10px;
@@ -93,7 +98,7 @@ li input{
 .graph-info-box{
    z-index: 10;
    top: 25px;
-   left: 26%;
+   left: var(--width-panel);
    position: absolute;
    background-color: white;
    border: solid gray;
@@ -206,6 +211,7 @@ li input{
   color: #FFE9E2;
   vertical-align: top;
   cursor: pointer;
+  display: inline-block;
 }
 
 /*Member*/

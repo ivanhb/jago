@@ -37,6 +37,7 @@ var graph_style = {
     "group": {
       "001": {
         'shape': 'diamond',
+        'font-size': '13pt',
         'width': '35',
         'height': '35',
         'background-color': '#ee7a22',
@@ -44,6 +45,7 @@ var graph_style = {
       },
       "002": {
         'shape': 'pentagon',
+        'font-size': '16pt',
         'width': '50',
         'height': '50',
         'background-color': '#2296EE',
@@ -51,12 +53,14 @@ var graph_style = {
       },
       "003": {
         'shape': 'diamond',
+        'font-size': '11pt',
         'width': '20',
         'height': '20',
         'background-color': '#CE1271',
         'label': 'data(attribute.nickname)'
       },
       "005": {
+        'font-size': '11pt',
         'width': '20',
         'height': '20',
         'background-color': '#F4D03F',
@@ -64,6 +68,7 @@ var graph_style = {
       },
       "004": {
         'shape': 'pentagon',
+        'font-size': '16pt',
         'width': '100',
         'height': '100',
         'background-color': '#2F8A60',
@@ -71,6 +76,7 @@ var graph_style = {
       },
       "007": {
         'shape': 'diamond',
+        'font-size': '11pt',
         'width': '20',
         'height': '20',
         'background-color': '#9E4FC5',
@@ -78,11 +84,20 @@ var graph_style = {
       }
     }
 }
+
+/*
+The availiable filters are:
+"classes": check while processing the nodes
+"keywords": check while processing the nodes
+
+Note: Comment the filters you dont want in the interface
+*/
 var graph_filter = {
-  "nodes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"],
+  "classes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"],
   "keywords":{class: "Keyword", attribute:"value", items:[]}
 };
-var graph_info_panel = {
+
+var graph_info_box = {
   nodes:{
     "Code": {"title":[],"source":[is_link],"@hasKeyword":null},
     "Publication": {"reference":[],"persistent_id":[is_link],"@hasKeyword":null},
@@ -192,6 +207,7 @@ var pending = {
   nodes: {},
   non_nodes: {}
 }
+
 function build_graph() {
 
   // init all the graph elements
@@ -245,7 +261,7 @@ function build_graph() {
               //pending.nodes[class_name] = true;
             },
             success: function(a_class_file_data) {
-              if (graph_filter.nodes.indexOf(class_name) != -1) {
+              if (_node_respect_filters(class_name)) {
                   if ("items" in a_class_file_data) {
 
                           class_index[class_name]["items"] = a_class_file_data["items"];
@@ -271,7 +287,20 @@ function build_graph() {
                 process_edges();
             }
     });
+
+    function _node_respect_filters(class_name, node_data = null){
+      var respects = true;
+      //classes filter
+      if ("classes" in graph_filter) {
+        if (graph_filter.classes.indexOf(class_name) == -1) {
+          respects = false;
+        }
+      }
+      return respects;
+    }
   }
+
+
 
   function process_a_non_node(index) {
     var class_name = other_classes[index];
@@ -418,61 +447,63 @@ function build_graph() {
 
 
 function build_panel() {
+  var cy_grpah_container = document.getElementById(graph_container);
   var grpah_panel = document.getElementById(graph_panel_container);
 
   // Add the filter legend
   // ***************************
   var filter_section = document.createElement("div");
 
-  var list_items = document.createElement("ul");
-  for (var i = 0; i < graph_conf.nodes.length; i++) {
-    var a_li = document.createElement("li");
+  if ("classes" in graph_filter) {
+    var list_items = document.createElement("ul");
+    for (var i = 0; i < graph_conf.nodes.length; i++) {
+      var a_li = document.createElement("li");
 
-    //the corresponding icon
-    var svg_shape = null;
-    if(graph_conf.nodes[i].group in graph_style.group){
-      var gr_style_obj = graph_style.group[graph_conf.nodes[i].group];
-      svg_shape = '<circle cx="50" cy="50" r="50" style="fill:'+gr_style_obj["background-color"]+';" />';
-      if ("shape" in gr_style_obj) {
-        switch (gr_style_obj["shape"]) {
-          case "diamond":
-            svg_shape = '<polygon points="50,0 100,50 50,100 0,50" style="fill:'+gr_style_obj["background-color"]+';" />';
-            break;
-          case "pentagon":
-            svg_shape = '<polygon points="50,0 100,37 90,100 10,100 0,37" style="fill:'+gr_style_obj["background-color"]+';" />';
-            break;
-          default:
-            svg_shape = '<circle cx="50" cy="50" r="50" style="fill:'+gr_style_obj["background-color"]+';" />';
+      //the corresponding icon
+      var svg_shape = null;
+      if(graph_conf.nodes[i].group in graph_style.group){
+        var gr_style_obj = graph_style.group[graph_conf.nodes[i].group];
+        svg_shape = '<circle cx="50" cy="50" r="50" style="fill:'+gr_style_obj["background-color"]+';" />';
+        if ("shape" in gr_style_obj) {
+          switch (gr_style_obj["shape"]) {
+            case "diamond":
+              svg_shape = '<polygon points="50,0 100,50 50,100 0,50" style="fill:'+gr_style_obj["background-color"]+';" />';
+              break;
+            case "pentagon":
+              svg_shape = '<polygon points="50,0 100,37 90,100 10,100 0,37" style="fill:'+gr_style_obj["background-color"]+';" />';
+              break;
+            default:
+              svg_shape = '<circle cx="50" cy="50" r="50" style="fill:'+gr_style_obj["background-color"]+';" />';
+          }
         }
       }
-    }
-    var legend_icon = '<svg class="legend-icon" height="100" width="100">'+svg_shape+'</svg>'
-    //the label and icon
-    var is_checked = "";
-    if (graph_filter.nodes.indexOf(graph_conf.nodes[i].class) != -1) {
-      is_checked = "checked";
-    }
+      var legend_icon = '<svg class="legend-icon" height="100" width="100">'+svg_shape+'</svg>'
+      //the label and icon
+      var is_checked = "";
+      if (graph_filter.classes.indexOf(graph_conf.nodes[i].class) != -1) {
+        is_checked = "checked";
+      }
 
-    a_li.innerHTML = "<input class='checkbox-node' type='checkbox' value='"+graph_conf.nodes[i].class+"' "+is_checked+"><span>"+graph_conf.nodes[i].class+"</span><span>"+legend_icon+"</span>";
-    list_items.appendChild(a_li);
+      a_li.innerHTML = "<input class='checkbox-node' type='checkbox' value='"+graph_conf.nodes[i].class+"' "+is_checked+"><span>"+graph_conf.nodes[i].class+"</span><span>"+legend_icon+"</span>";
+      list_items.appendChild(a_li);
+    }
+    filter_section.appendChild(list_items);
   }
-  filter_section.appendChild(list_items);
-
 
   // Add the keyword filter
   // ***************************
-  var keyword_container = document.createElement("div");
-  keyword_container.className = "list-keyword";
   if ("keywords" in graph_filter) {
-    var keyword_val = "Add #keyword";
+    var keyword_container = document.createElement("div");
+    keyword_container.className = "list-keyword";
+
     i_kw = 0;
-    var first_class = "first";
+    var keyword_val = "Add #keyword";
     do {
-      var a_keyword = document.createElement("div");
-      a_keyword.innerHTML = keyword_val;
-      a_keyword.className = "a-keyword "+first_class;
-      if (first_class != "") {
-        first_class = "";
+      var a_keyword = null;
+      if (i_kw == 0) {
+        a_keyword = document.createElement("div");
+        a_keyword.innerHTML = keyword_val;
+        a_keyword.className = "a-keyword first";
         a_keyword.onclick = function(){
           //build the list of options
           if (("class" in graph_filter.keywords) && ("attribute" in graph_filter.keywords)) {
@@ -481,15 +512,17 @@ function build_panel() {
               console.log(list_of_opt);
               this.parentNode.insertBefore(list_of_opt, this.nextSibling);
           }
-
         };
+      }else {
+        a_keyword = build_a_keyword(keyword_val);
       }
+
       keyword_container.appendChild(a_keyword);
       keyword_val = graph_filter.keywords.items[i_kw];
       i_kw += 1;
     } while (keyword_val != undefined);
+    filter_section.appendChild(keyword_container);
   }
-  filter_section.appendChild(keyword_container);
 
   // Add the filter button
   // ***************************
@@ -498,12 +531,12 @@ function build_panel() {
   apply_filter_btn.innerHTML = "Apply";
   apply_filter_btn.onclick = function(){
     //init graph_filter
-    graph_filter.nodes = [];
+    graph_filter.classes = [];
 
     var list_checkbox_nodes = document.getElementsByClassName("checkbox-node");
     for (var l = 0; l < list_checkbox_nodes.length; l++) {
       if(list_checkbox_nodes[l].checked){
-        graph_filter.nodes.push(list_checkbox_nodes[l].value);
+        graph_filter.classes.push(list_checkbox_nodes[l].value);
       }
     }
     build_graph();
@@ -512,7 +545,12 @@ function build_panel() {
 
   // Add all to the panel
   // ***************************
-  grpah_panel.appendChild(filter_section);
+  if (Object.keys(graph_filter).length > 0) {
+    grpah_panel.appendChild(filter_section);
+  }else {
+    document.documentElement.style.setProperty('--width-panel', '0%');
+    document.documentElement.style.setProperty('--width-graph', '100%');
+  }
 
 
   // Add the events handler
@@ -521,7 +559,7 @@ function build_panel() {
       $(".graph-info-box").remove();
       var attributes = this._private.data.attribute;
       var class_name = this._private.data.item_class;
-      if ((attributes != undefined) && (class_name in graph_info_panel.nodes)){
+      if ((attributes != undefined) && (class_name in graph_info_box.nodes)){
           var _ul = document.createElement("div");
           _ul.className = "graph-info-box";
 
@@ -537,7 +575,7 @@ function build_panel() {
           _li.onclick = function(){$(".graph-info-box").remove();};
           _ul.appendChild(_li);
 
-          var arr_graph_panel_info_att = graph_info_panel.nodes[class_name];
+          var arr_graph_panel_info_att = graph_info_box.nodes[class_name];
           for (var att_k in arr_graph_panel_info_att) {
             if (att_k in attributes) {
               var inner_html_str = "";
@@ -574,19 +612,19 @@ function build_panel() {
 
   function build_one_nonnode(a_nonnode) {
       var current_class = a_nonnode.item_class;
-      if (current_class in graph_info_panel.nodes) {
+      if (current_class in graph_info_box.nodes) {
         var relations_to_process = {};
         var res = {};
 
         // check all the inner attributes
-        for (var att_k in graph_info_panel.nodes[current_class]) {
+        for (var att_k in graph_info_box.nodes[current_class]) {
           if (att_k.startsWith("@")) {
             if (att_k in a_nonnode.attribute) {
               relations_to_process[att_k] = a_nonnode.attribute[att_k];
             }
           }else {
             var inner_html_str = a_nonnode.attribute[att_k];
-            for (var i_f = 0; i_f < graph_info_panel.nodes[current_class][att_k].length; i_f++) {
+            for (var i_f = 0; i_f < graph_info_box.nodes[current_class][att_k].length; i_f++) {
               inner_html_str = Reflect.apply(arr_graph_panel_info_att[att_k][i_f],undefined,[inner_html_str]);
             }
             //res[att_k] = a_nonnode.attribute[att_k];
@@ -624,22 +662,39 @@ function build_panel() {
     for (var i = 0; i < sorted_values.length; i++) {
       var a_list_elem = document.createElement("div");
       a_list_elem.className = "opt-list-item";
+      a_list_elem.value = sorted_values[i];
       a_list_elem.innerHTML = sorted_values[i];
       list_container.appendChild(a_list_elem);
 
       a_list_elem.onclick = function(){
-        var a_add_keyword = document.createElement("div");
-        a_add_keyword.className = "a-keyword";
-        a_add_keyword.innerHTML = "<span class='value'>"+this.innerHTML+"</span><span class='close-class'>&#10005;</span>";
         document.getElementById("opt_list").remove();
-        keyword_container.appendChild(a_add_keyword);
-        $(".a-keyword .close-class").on( "click", function() {
-          this.parentNode.remove();
-        });
+        keyword_container.appendChild(build_a_keyword(this.value));
+        graph_filter.keywords.items.push(this.value);
       };
     }
 
     return list_container;
+  }
+
+  function build_a_keyword(val) {
+    var a_add_keyword = document.createElement("div");
+
+    var a_close_icon = document.createElement("div");
+    a_close_icon.className = 'close-class';
+    a_close_icon.value = val;
+    a_close_icon.innerHTML = "&#10005;";
+    a_close_icon.onclick = function(){
+      var index = graph_filter.keywords.items.indexOf(this.value);
+      if (index != -1) {
+        graph_filter.keywords.items.splice(index, 1);
+      }
+      this.parentNode.remove();
+    }
+
+    a_add_keyword.className = "a-keyword";
+    a_add_keyword.innerHTML = "<span class='value'>"+val+"</span>";
+    a_add_keyword.appendChild(a_close_icon);
+    return a_add_keyword;
   }
 
 }
