@@ -24,7 +24,8 @@ var graph_conf = {
     "Presentation":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date","@hasKeyword"],
     "Member": ["role","@hasPerson"],
     "Person":["nickname","name","position","affiliation","webpage"],
-    "Keyword": ["value"]
+    "Keyword": ["value"],
+    "Report": ["source","date","@hasKeyword"]
   },
   "edges": [
     "@hasWork",
@@ -69,8 +70,8 @@ var graph_style = {
       "004": {
         'shape': 'pentagon',
         'font-size': '16pt',
-        'width': '100',
-        'height': '100',
+        'width': '80',
+        'height': '80',
         'background-color': '#2F8A60',
         'label': 'data(attribute.nickname)'
       },
@@ -94,7 +95,8 @@ Note: Comment the filters you dont want in the interface
 */
 var graph_filter = {
   "classes":["Code","Publication","Activity","Organization","Project","Demo","Presentation"],
-  "keywords":{class: "Keyword", attribute:"value", items:[]}
+  "report": {class: "Report", bounding_att:"@hasKeyword", value:1, label:"Report: "},
+  "keywords": {type:"class", value: "Keyword", attribute:"value", items:[]}
 };
 
 var graph_info_box = {
@@ -108,7 +110,8 @@ var graph_info_box = {
     "Presentation": {"title":[],"source":[is_link],"@hasKeyword":null},
     "Keyword": {"value":[]},
     "Member": {"@hasPerson":null},
-    "Person":{"nickname":[]}
+    "Person":{"nickname":[]},
+    "Report":{"source":[]}
   }
 }
 
@@ -179,12 +182,14 @@ function def_class(class_name){
   var class_file = "";
   var class_tree = [];
   var class_edges = {};
+  var class_attribute = {};
 
   var init_class_name = class_name;
   do {
     class_tree.push(init_class_name);
     data_class_obj = model_index["class"][init_class_name];
-    //add the relations which are edges
+    //add the relations which are edges and attributes
+    class_attribute = Object.assign({}, class_attribute, data_class_obj.attribute);
     class_edges = Object.assign({}, class_edges, data_class_obj.relation);
     init_class_name = data_class_obj["@isSubclassOf"];
   } while (init_class_name != undefined);
@@ -197,6 +202,7 @@ function def_class(class_name){
   return {
     "items": [],
     "tree": class_tree,
+    "attribute": class_attribute,
     "edges": class_edges,
     "file": "src/"+class_file,
     "prefix": data_class_obj["prefix"]
@@ -264,9 +270,16 @@ function build_graph() {
               if (_node_respect_filters(class_name)) {
                   if ("items" in a_class_file_data) {
 
-                          class_index[class_name]["items"] = a_class_file_data["items"];
+                          var a_class_filtered_items = [];
+                          for (var i_item = 0; i_item < a_class_file_data.items.length; i_item++) {
+                            if (_node_respect_filters(class_name, a_class_file_data.items[i_item])) {
+                              a_class_filtered_items.push(a_class_file_data.items[i_item]);
+                            }
+                          }
 
-                          def_elems(class_name, a_class_def, a_class_file_data);
+                          class_index[class_name]["items"] = a_class_filtered_items;
+
+                          def_elems(class_name, a_class_def, {'items': a_class_filtered_items});
 
                           // ----------
                           // The style of the Element
@@ -289,14 +302,41 @@ function build_graph() {
     });
 
     function _node_respect_filters(class_name, node_data = null){
-      var respects = true;
+
       //classes filter
       if ("classes" in graph_filter) {
         if (graph_filter.classes.indexOf(class_name) == -1) {
-          respects = false;
+          return false;
         }
       }
-      return respects;
+
+      if (("keywords" in graph_filter) && (node_data != null)) {
+        var elem_to_check = null;
+
+        var filter_prop = graph_filter.keywords.value;
+        // if the type is a class then check the edges
+        if (graph_filter.keywords.type == "class") {
+          for (var a_k in class_index[class_name].edges) {
+            if (class_index[class_name].edges[a_k] == filter_prop){
+              //get its value from "relation"
+              elem_to_check = node_data.relation[a_k];
+            }
+          }
+        }else if (graph_filter.keywords.type == "attribute") {
+          // if the type is an attribute then check the edges
+          elem_to_check = node_data.attribute[filter_prop];
+        }
+
+        if ((graph_filter.keywords.items.length > 0) && (elem_to_check != null)){
+          var intersect = elem_to_check.filter(value => -1 !== graph_filter.keywords.items.indexOf(value));
+          if (intersect.length == 0) {
+            return false;
+          }
+        }
+      }
+
+
+      return true;
     }
   }
 
@@ -378,6 +418,10 @@ function build_graph() {
             }
           }
 
+          //Assign reports in case we want it
+          //in this case we add "report" to each node
+          process_report();
+
           // Ready to build all
           cy_graph = cytoscape(cy_graph_def);
           build_panel();
@@ -385,6 +429,7 @@ function build_graph() {
           console.log(cy_graph_def);
           console.log(class_index);
           console.log(cy_graph_index);
+          console.log(graph_filter);
       }
 
       function are_no_pending_calls(){
@@ -397,6 +442,92 @@ function build_graph() {
         }
         return res;
       }
+  }
+
+  function process_report(){
+    if ("report" in graph_filter) {
+      var report_class_def = class_index[graph_filter.report.class];
+      var report_data = _get_report_data();
+      report_data = report_data.slice(0, graph_filter.report.value);
+
+      // get the common bounding variable
+      var report_bounding_vals = {};
+      for (var i_r = 0; i_r < report_data.length; i_r++) {
+        report_bounding_vals[report_data[i_r].id] = report_data[i_r].attribute[graph_filter.report.bounding_att];
+      }
+
+      //iterate all nodes
+      for (var i_n = 0; i_n < cy_graph_def["elements"].nodes.length; i_n++) {
+
+        var corresponding_node = cy_graph_def["elements"].nodes[i_n];
+        corresponding_node.data.attribute["@@Report"] = [];
+
+        var border_width = 0;
+        if (graph_filter.report.bounding_att in corresponding_node.data.attribute) {
+          for (var k_repo in report_bounding_vals) {
+            var intersect = false;
+            var check_elems = corresponding_node.data.attribute[graph_filter.report.bounding_att];
+            var intersect = report_bounding_vals[k_repo].filter(value => -1 !== check_elems.indexOf(value));
+            if (intersect.length > 0) {
+              corresponding_node.data.attribute["@@Report"].push(k_repo);
+            }
+          }
+          border_width = corresponding_node.data.attribute["@@Report"].length * 3;
+        }else {
+          corresponding_node.data.attribute["@@Report"] = [];
+        }
+
+        /*style it too*/
+        var elem_style = {
+            selector: "node[id = '"+corresponding_node.data.id+"']",
+            style: {
+              'border-width': border_width,
+              'border-color': '#E74B4B'
+            }
+        };
+        cy_graph_def["style"].push(elem_style);
+      }
+    }
+
+    function _get_report_data() {
+      var res = [];
+      var report_class_def = class_index[graph_filter.report.class];
+      for (var k_id in class_data_non_nodes) {
+        if(k_id.includes(report_class_def.prefix)){
+          res.push(class_data_non_nodes[k_id]);
+        }
+      }
+
+      /*sort array of objects according to date*/
+      var sorted_res = res.sort(compare);
+      function compare( a, b ) {
+        var a_d_parts = convert_date(a.attribute.date);
+        a = new Date(a_d_parts[0], a_d_parts[1], a_d_parts[2]);
+
+        var b_d_parts = convert_date(b.attribute.date);
+        b = new Date(b_d_parts[0], b_d_parts[1], b_d_parts[2]);
+
+        if ( a < b ){
+          return -1;
+        }
+        if ( a > b ){
+          return 1;
+        }
+        return 0;
+      }
+      function convert_date(a) {
+        var a_parts = a.split("/");
+        var a_int_parts = ["1","0","2000"];
+        var date_index = 2;
+        for (var i_part = 0; i_part < a_parts.length; i_part++) {
+          a_int_parts[date_index] = parseInt(a_parts[i_part]);
+          date_index -= 1;
+        }
+        return a_int_parts;
+      }
+
+      return sorted_res;
+    }
   }
 
   function def_elems(class_name, a_class_def, a_class_file_data, is_node = true){
@@ -493,34 +624,48 @@ function build_panel() {
   // Add the keyword filter
   // ***************************
   if ("keywords" in graph_filter) {
+    var a_filter_class_index = class_index[graph_filter.keywords.value];
+    var a_filter_attribute = graph_filter.keywords.attribute;
     var keyword_container = document.createElement("div");
     keyword_container.className = "list-keyword";
 
     i_kw = 0;
-    var keyword_val = "Add #keyword";
+    var keyword_value = "Add #keyword";
     do {
       var a_keyword = null;
       if (i_kw == 0) {
         a_keyword = document.createElement("div");
-        a_keyword.innerHTML = keyword_val;
+        a_keyword.innerHTML = keyword_value;
         a_keyword.className = "a-keyword first";
         a_keyword.onclick = function(){
-          //build the list of options
-          if (("class" in graph_filter.keywords) && ("attribute" in graph_filter.keywords)) {
-              console.log(class_index[graph_filter.keywords.class].items);
-              var list_of_opt = build_list_options(class_index[graph_filter.keywords.class].items, graph_filter.keywords.attribute);
-              console.log(list_of_opt);
-              this.parentNode.insertBefore(list_of_opt, this.nextSibling);
+
+          var list_container = document.getElementById("opt_list");
+          if (list_container) {
+            list_container.remove();
+          }else {
+            //build the list of options
+            if (("value" in graph_filter.keywords) && ("attribute" in graph_filter.keywords)) {
+                var list_of_opt = build_list_options(class_index[graph_filter.keywords.value].items, "id", graph_filter.keywords.attribute);
+                this.parentNode.insertBefore(list_of_opt, this.nextSibling);
+            }
           }
         };
       }else {
-        a_keyword = build_a_keyword(keyword_val);
+        a_keyword = build_a_keyword(keyword_value, keyword_id);
       }
 
       keyword_container.appendChild(a_keyword);
-      keyword_val = graph_filter.keywords.items[i_kw];
+      keyword_id = graph_filter.keywords.items[i_kw];
+      if (keyword_id == undefined) {
+        break;
+      }else {
+        keyword_key = a_filter_class_index.prefix +"/" + keyword_id;
+        if (keyword_key in class_data_non_nodes) {
+          keyword_value = class_data_non_nodes[keyword_key].attribute[a_filter_attribute];
+        }
+      }
       i_kw += 1;
-    } while (keyword_val != undefined);
+    } while (keyword_id != undefined);
     filter_section.appendChild(keyword_container);
   }
 
@@ -645,46 +790,61 @@ function build_panel() {
       }
   }
 
-  function build_list_options(list, att) {
+  function build_list_options(list, id_val_att, val_att) {
     var sorted_values = [];
     for (var i = 0; i < list.length; i++) {
-      if (att in list[i].attribute) {
-        sorted_values.push(list[i].attribute[att]);
+      if (val_att in list[i].attribute) {
+        sorted_values.push({
+          "val": list[i].attribute[val_att],
+          "id": list[i][id_val_att]
+        });
       }
     }
 
-    sorted_values = sorted_values.sort();
+    /*sort array of objects*/
+    sorted_values = sorted_values.sort(compare);
+    function compare( a, b ) {
+      if ( a.val < b.val ){
+        return -1;
+      }
+      if ( a.val > b.val ){
+        return 1;
+      }
+      return 0;
+    }
 
     //add the html component
     var list_container = document.createElement("div");
     list_container.id = "opt_list";
-    list_container.className = "opt-list "+att;
+    list_container.className = "opt-list "+val_att;
     for (var i = 0; i < sorted_values.length; i++) {
       var a_list_elem = document.createElement("div");
       a_list_elem.className = "opt-list-item";
-      a_list_elem.value = sorted_values[i];
-      a_list_elem.innerHTML = sorted_values[i];
+      a_list_elem.id = sorted_values[i].id;
+      a_list_elem.value = sorted_values[i].val;
+      a_list_elem.innerHTML = sorted_values[i].val;
       list_container.appendChild(a_list_elem);
 
       a_list_elem.onclick = function(){
         document.getElementById("opt_list").remove();
-        keyword_container.appendChild(build_a_keyword(this.value));
-        graph_filter.keywords.items.push(this.value);
+        keyword_container.appendChild(build_a_keyword(this.value,this.id));
+        graph_filter.keywords.items.push(this.id);
       };
     }
 
     return list_container;
   }
 
-  function build_a_keyword(val) {
+  function build_a_keyword(val,id) {
     var a_add_keyword = document.createElement("div");
 
     var a_close_icon = document.createElement("div");
     a_close_icon.className = 'close-class';
+    a_close_icon.id = id;
     a_close_icon.value = val;
     a_close_icon.innerHTML = "&#10005;";
     a_close_icon.onclick = function(){
-      var index = graph_filter.keywords.items.indexOf(this.value);
+      var index = graph_filter.keywords.items.indexOf(this.id.toString());
       if (index != -1) {
         graph_filter.keywords.items.splice(index, 1);
       }
