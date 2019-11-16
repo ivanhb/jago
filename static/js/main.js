@@ -18,7 +18,7 @@ var graph_conf = {
     "Publication":["nickname","reference","reference_format","author","date","persistent_id","persistent_id_type","@hasKeyword"],
     "Code":["nickname","title","subtitle","date","persistent_id","persistent_id_type","source","@hasKeyword"],
     "Activity":["nickname","title","subtitle","date","description","contribution","location","webpage","start_date","end_date","@hasKeyword"],
-    "Organization":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date","@hasKeyword","@hasMember"],
+    "Organization":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date","@hasKeyword","@hasMember","@@Report"],
     "Project":["nickname","name","description","personal_webpage","logo","webpage","start_date","end_date","@hasKeyword","@hasMember"],
     "Demo":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date","@hasKeyword"],
     "Presentation":["nickname","source","title","subtitle","persistent_id","persistent_id_type","date","@hasKeyword"],
@@ -101,28 +101,33 @@ var graph_filter = {
 
 var graph_info_box = {
   nodes:{
-    "Code": {"title":[],"source":[is_link],"@hasKeyword":null},
-    "Publication": {"reference":[],"persistent_id":[is_link],"@hasKeyword":null},
-    "Activity": {"start_date":[],"end_date":[is_end_date],"location":[],"title":[],"subtitle":[],"contribution":[is_contribution],"@hasKeyword":null,"webpage":[is_webpage]},
-    "Organization": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[],"@hasMember":null,"@hasKeyword":null,"webpage":[is_webpage]},
-    "Project": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[is_personal_webpage],"@hasMember":null,"@hasKeyword":null,"webpage":[is_webpage]},
-    "Demo": {"title":[],"source":[is_link],"@hasKeyword":null},
-    "Presentation": {"title":[],"source":[is_link],"@hasKeyword":null},
+    "Code": {"title":[],"source":[is_link],"@hasKeyword":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null},
+    "Publication": {"reference":[],"persistent_id":[is_link],"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null,"@hasKeyword":null},
+    "Activity": {"start_date":[],"end_date":[is_end_date],"location":[],"title":[],"subtitle":[],"contribution":[is_contribution],"@hasKeyword":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null,"webpage":[is_webpage]},
+    "Organization": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[],"@hasKeyword":null,"<HTML>:H1":"<div class='att header'>People:</div>","@hasMember":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null,"webpage":[is_webpage]},
+    "Project": {"start_date":[],"end_date":[is_end_date],"name":[],"description":[],"personal_webpage":[is_personal_webpage],"@hasKeyword":null,"<HTML>:H1":"<div class='att header'>People:</div>","@hasMember":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null,"webpage":[is_webpage]},
+    "Demo": {"title":[],"source":[is_link],"@hasKeyword":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null},
+    "Presentation": {"title":[],"source":[is_link],"@hasKeyword":null,"<HTML>:H2":"<div class='att header'>Report/s:</div>","@@Report":null},
     "Keyword": {"value":[]},
     "Member": {"@hasPerson":null},
-    "Person":{"nickname":[]},
-    "Report":{"source":[]}
+    "Person":{"nickname":[],"webpage":[is_person_link]},
+    "Report":{"date":[], "source":[is_repo_link]}
   }
 }
-
+function is_person_link(a_str) {
+  return "<a target='_blank' href='"+a_str+"'>\></a>";
+}
+function is_repo_link(a_str) {
+  return "<a target='_blank' href='"+a_str+"'>Read report</a>";
+}
 function is_link(a_str) {
-  return "<a href='"+a_str+"'>"+a_str+"</a>";
+  return "<a target='_blank' href='"+a_str+"'>"+a_str+"</a>";
 }
 function is_webpage(a_str) {
-  return "<a href='"+a_str+"'>Visit the website -></a>";
+  return "<a target='_blank' href='"+a_str+"'>Visit the website -></a>";
 }
 function is_personal_webpage(a_str) {
-  return "<a href='"+a_str+"'>"+a_str+"</a>";
+  return "<a target='_blank' href='"+a_str+"'>"+a_str+"</a>";
 }
 function is_end_date(a_str) {
   return " - "+a_str;
@@ -193,6 +198,11 @@ function def_class(class_name){
     class_edges = Object.assign({}, class_edges, data_class_obj.relation);
     init_class_name = data_class_obj["@isSubclassOf"];
   } while (init_class_name != undefined);
+
+  //put Report also
+  if ("report" in graph_filter) {
+    class_edges["@@Report"] = graph_filter.report["class"];
+  }
 
   for (var i = 1; i < class_tree.length; i++) {
     class_file = class_tree[i].toLowerCase() + "/" + class_file;
@@ -579,12 +589,65 @@ function build_graph() {
 
 function build_panel() {
   var cy_grpah_container = document.getElementById(graph_container);
-  var grpah_panel = document.getElementById(graph_panel_container);
+  var graph_panel = document.getElementById(graph_panel_container);
+
+  var filter_section = document.createElement("div");
+
+  // Add the Report handler
+  // ***************************
+  if ("report" in graph_filter){
+    var report_container = document.createElement("div");
+    report_container.className = "report";
+    report_container.innerHTML = "Show last <span id='report_label'>"+graph_filter.report.value+"</span> report/s "
+
+    var minus_btn = document.createElement("button");
+    minus_btn.className = "minus";
+    minus_btn.value = "-";
+    minus_btn.innerHTML = "-";
+    minus_btn.onclick = function(){
+      graph_filter.report.value -= 1;
+      if (graph_filter.report.value < 0) {
+        graph_filter.report.value = 0;
+      }else {
+        var block = document.getElementsByClassName("block-progress");
+        block[0].remove();
+      }
+      document.getElementById("report_label").innerHTML = graph_filter.report.value;
+    }
+    report_container.appendChild(minus_btn);
+
+    var content = document.createElement("div");
+    content.className = "content";
+    content.id = "report_content";
+    report_container.appendChild(content);
+
+    var plus_btn = document.createElement("button");
+    plus_btn.className = "plus";
+    plus_btn.value = "+";
+    plus_btn.innerHTML = "+";
+    plus_btn.onclick = function(){
+      graph_filter.report.value += 1;
+      if (graph_filter.report.value > 10) {
+        graph_filter.report.value = 10;
+      }else {
+        var block = document.createElement("div");
+        block.className = "block-progress";
+        document.getElementById("report_content").appendChild(block);
+      }
+      document.getElementById("report_label").innerHTML = graph_filter.report.value;
+    }
+    report_container.appendChild(plus_btn);
+    graph_panel.appendChild(report_container);
+  }
+
+  for (var i = 0; i < graph_filter.report.value; i++) {
+    var block = document.createElement("div");
+    block.className = "block-progress";
+    document.getElementById("report_content").appendChild(block);
+  }
 
   // Add the filter legend
   // ***************************
-  var filter_section = document.createElement("div");
-
   if ("classes" in graph_filter) {
     var list_items = document.createElement("ul");
     for (var i = 0; i < graph_conf.nodes.length; i++) {
@@ -618,7 +681,7 @@ function build_panel() {
       a_li.innerHTML = "<input class='checkbox-node' type='checkbox' value='"+graph_conf.nodes[i].class+"' "+is_checked+"><span>"+graph_conf.nodes[i].class+"</span><span>"+legend_icon+"</span>";
       list_items.appendChild(a_li);
     }
-    filter_section.appendChild(list_items);
+    graph_panel.appendChild(list_items);
   }
 
   // Add the keyword filter
@@ -666,7 +729,7 @@ function build_panel() {
       }
       i_kw += 1;
     } while (keyword_id != undefined);
-    filter_section.appendChild(keyword_container);
+    graph_panel.appendChild(keyword_container);
   }
 
   // Add the filter button
@@ -686,13 +749,11 @@ function build_panel() {
     }
     build_graph();
   };
-  filter_section.appendChild(apply_filter_btn);
+  graph_panel.appendChild(apply_filter_btn);
 
   // Add all to the panel
   // ***************************
-  if (Object.keys(graph_filter).length > 0) {
-    grpah_panel.appendChild(filter_section);
-  }else {
+  if (Object.keys(graph_filter).length <= 0) {
     document.documentElement.style.setProperty('--width-panel', '0%');
     document.documentElement.style.setProperty('--width-graph', '100%');
   }
@@ -744,19 +805,27 @@ function build_panel() {
               _li = document.createElement("div");
               var class_att_k = att_k;
               if (class_att_k.startsWith("@")) {
-                class_att_k = class_att_k.substring(1,)
+                class_att_k = class_att_k.replace("@@","a");
+                class_att_k = class_att_k.replace("@","");
               }
               _li.className = "att"+" "+class_att_k;
               _li.innerHTML = inner_html_str;
               _ul.appendChild(_li);
+            }else if (att_k.startsWith("<HTML>")) {
+              _li = document.createElement("div");
+              _li.className = "att"+"-html";
+              _li.innerHTML = arr_graph_panel_info_att[att_k];
+              _ul.appendChild(_li);
             }
           }
-          grpah_panel.appendChild(_ul);
+          graph_panel.appendChild(_ul);
       }
   });
 
   function build_one_nonnode(a_nonnode) {
       var current_class = a_nonnode.item_class;
+      var arr_graph_panel_info_att = graph_info_box.nodes[current_class];
+
       if (current_class in graph_info_box.nodes) {
         var relations_to_process = {};
         var res = {};

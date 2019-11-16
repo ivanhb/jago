@@ -24,12 +24,78 @@ body{
   height: fit-content;
   padding-left: 10px;
   padding-right: 10px;
+  padding-top: 15px;
 }
 
 .legend-icon{
   padding-left: 50px;
   zoom: 0.2;
   display: inline-block;
+}
+
+.report{
+  margin-bottom: 30px!important;
+  width: 80%;
+  padding-left: 3px;
+  margin: 0 auto;
+}
+.report #report_label{
+  display: inline-block;
+  width: 23px;
+  font-size: 16pt;
+  color: #E74B4B;
+  text-align: center;
+}
+.report .minus{
+  font-size: 12pt;
+  text-align: center;
+  margin-left: 2px;
+  width: 30px;
+  display: inline-block;
+  border-radius: 8px;
+  border: solid 1.5px gray;
+}
+.report .minus:hover{
+  cursor: pointer;
+  color: white;
+  background-color: gray;
+}
+.report .content{
+  font-size: 12pt;
+  text-align: center;
+  width: 25%;
+  height: 10px;
+  display: inline-block;
+  border-radius: 8px;
+}
+.block-progress{
+  float:left;
+  display: inline-block;
+  background-color: #E74B4B;
+  width: 10%;
+  height: inherit;
+}
+.report .plus{
+  font-size: 12pt;
+  text-align: center;
+  width: 30px;
+  display: inline-block;
+  border-radius: 8px;
+  border: solid 1.5px gray;
+}
+.report .plus:hover{
+  cursor: pointer;
+  color: white;
+  background-color: gray;
+}
+
+ul{
+  border-top: solid #cccccc 3px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-bottom: solid #cccccc 3px;
+  width: 80%;
+  margin: 0 auto;
 }
 
 li{
@@ -48,7 +114,9 @@ li input{
 }
 
 .list-keyword{
-  margin-left: 40px;
+  width: 80%;
+  padding-top: 20px;
+  margin: 0 auto;
   margin-bottom: 10px;
 }
 .list-keyword .a-keyword{
@@ -164,7 +232,37 @@ li input{
 }
 
 .graph-info-box div.att{
-  padding-top: 10px;
+  padding-top: 5px;
+}
+.graph-info-box div .att.header{
+  font-size: 14pt;
+  margin-top: 5px;
+}
+
+/*Report*/
+.graph-info-box div.aReport .date{
+  background-color: #E74B4B;
+  font-size: 11pt;
+  display: inline-block;
+  padding: 4px;
+  font-size: 11pt;
+  color: white!important;
+  border-radius: 3px 0px 0px 3px;
+}
+.graph-info-box div.aReport .source{
+  background-color: #E74B4B;
+  display: inline-block;
+  font-size: 11pt;
+  padding: 4px;
+  border-radius: 0px 3px 3px 0px;
+}
+.graph-info-box div.aReport .date + .source{
+  display: inline-block;
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+.graph-info-box div.aReport .source a{
+ color: white!important;
 }
 
 /*Keyword*/
@@ -217,15 +315,27 @@ li input{
 /*Member*/
 .graph-info-box div.hasMember .nickname{
   display: inline-block;
-  margin-right: 10px;
-  margin-bottom: 10px;
   background-color: #dfb38f;
   padding: 4px;
-  border-radius: 3px 3px 3px 3px;
+  border-radius: 3px 0px 0px 3px;
 }
-.graph-info-box div.hasMember .nickname::before {
-  content: "> ";
+.graph-info-box div.hasMember .webpage{
+  display: inline-block;
+  background-color: #dfb38f;
+  padding: 4px;
+  border-radius: 0px 3px 3px 0px;
 }
+.graph-info-box div.hasMember .nickname + .webpage{
+  display: inline-block;
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+.graph-info-box div.hasMember .webpage a{
+ color: black!important;
+}
+
+
+
 
 .graph-info-box div.title{
   padding-top: 0px;
